@@ -160,6 +160,18 @@ main {
   gap: 1rem;
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
+  cursor: grab;
+}
+
+.itinerary-item.dragging {
+  opacity: 0.4;
+}
+
+.itinerary-item .drag-handle {
+  color: #b99b6b;
+  font-size: 1.1rem;
+  line-height: 1;
+  user-select: none;
 }
 
 .itinerary-item .time {

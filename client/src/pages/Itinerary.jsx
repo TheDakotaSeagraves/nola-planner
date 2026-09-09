@@ -3,6 +3,7 @@ import {
   getItinerary,
   addItineraryItem,
   deleteItineraryItem,
+  reorderItinerary,
   getPlaces,
   getEvents,
 } from "../api/client";
@@ -15,6 +16,7 @@ const Itinerary = ({ draftItem, clearDraft }) => {
   const [events, setEvents] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
+  const [draggedId, setDraggedId] = useState(null);
 
   const loadItinerary = () => {
     getItinerary().then(setItems).catch((err) => setError(err.message));
@@ -68,14 +70,46 @@ const Itinerary = ({ draftItem, clearDraft }) => {
     loadItinerary();
   };
 
-  const grouped = items
-    .slice()
-    .sort((a, b) => (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")))
-    .reduce((acc, item) => {
-      acc[item.date] = acc[item.date] || [];
-      acc[item.date].push(item);
-      return acc;
-    }, {});
+  const handleDrop = async (date, targetId) => {
+    const sourceId = draggedId;
+    setDraggedId(null);
+    if (sourceId === null || sourceId === targetId) return;
+
+    const dayIds = grouped[date].map((item) => item.id);
+    const fromIndex = dayIds.indexOf(sourceId);
+    const toIndex = dayIds.indexOf(targetId);
+    if (fromIndex === -1 || toIndex === -1) return;
+
+    dayIds.splice(fromIndex, 1);
+    dayIds.splice(toIndex, 0, sourceId);
+
+    setItems((prev) =>
+      prev.map((item) =>
+        item.date === date
+          ? { ...item, order: dayIds.indexOf(item.id) }
+          : item
+      )
+    );
+
+    try {
+      await reorderItinerary(date, dayIds);
+    } catch (err) {
+      setError(err.message);
+      loadItinerary();
+    }
+  };
+
+  const grouped = items.reduce((acc, item) => {
+    acc[item.date] = acc[item.date] || [];
+    acc[item.date].push(item);
+    return acc;
+  }, {});
+
+  Object.values(grouped).forEach((dayItems) =>
+    dayItems.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  );
+
+  const sortedDates = Object.keys(grouped).sort();
 
   return (
     <div className="page">
@@ -139,14 +173,27 @@ const Itinerary = ({ draftItem, clearDraft }) => {
         <button type="submit">Add to itinerary</button>
       </form>
 
-      {Object.keys(grouped).length === 0 && <p>No itinerary items yet.</p>}
+      {sortedDates.length === 0 && <p>No itinerary items yet.</p>}
 
-      {Object.entries(grouped).map(([date, dayItems]) => (
+      {sortedDates.map((date) => (
         <div key={date} className="day-block">
           <h3>{date}</h3>
           <ul>
-            {dayItems.map((item) => (
-              <li key={item.id} className="itinerary-item">
+            {grouped[date].map((item) => (
+              <li
+                key={item.id}
+                className={`itinerary-item${
+                  draggedId === item.id ? " dragging" : ""
+                }`}
+                draggable
+                onDragStart={() => setDraggedId(item.id)}
+                onDragEnd={() => setDraggedId(null)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => handleDrop(date, item.id)}
+              >
+                <span className="drag-handle" title="Drag to reorder">
+                  ⠿
+                </span>
                 <span className="time">{item.time || "--:--"}</span>
                 <span className="label">
                   {item.placeId && placeName(item.placeId)}
