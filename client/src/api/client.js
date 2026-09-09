@@ -35,3 +35,9 @@ export const updateItineraryItem = (id, item) =>
 
 export const deleteItineraryItem = (id) =>
   request(`/itinerary/${id}`, { method: "DELETE" });
+
+export const reorderItinerary = (date, orderedIds) =>
+  request("/itinerary/reorder", {
+    method: "PATCH",
+    body: JSON.stringify({ date, orderedIds }),
+  });
