@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "name": "Cafe du Monde",
+    "category": "food",
+    "neighborhood": "French Quarter",
+    "lat": 29.9575,
+    "lng": -90.0616,
+    "description": "Iconic 24-hour cafe known for beignets and cafe au lait."
+  },
+  {
+    "id": 2,
+    "name": "Preservation Hall",
+    "category": "music",
+    "neighborhood": "French Quarter",
+    "lat": 29.9585,
+    "lng": -90.0663,
+    "description": "Intimate venue for traditional New Orleans jazz."
+  },
+  {
+    "id": 3,
+    "name": "The National WWII Museum",
+    "category": "history",
+    "neighborhood": "Warehouse District",
+    "lat": 29.9424,
+    "lng": -90.0716,
+    "description": "Extensive museum covering the American experience in WWII."
+  },
+  {
+    "id": 4,
+    "name": "Jackson Square",
+    "category": "landmark",
+    "neighborhood": "French Quarter",
+    "lat": 29.9575,
+    "lng": -90.0627,
+    "description": "Historic square in front of St. Louis Cathedral, popular with artists and street performers."
+  },
+  {
+    "id": 5,
+    "name": "Frenchmen Street",
+    "category": "music",
+    "neighborhood": "Faubourg Marigny",
+    "lat": 29.9626,
+    "lng": -90.0587,
+    "description": "Local favorite strip of live music clubs and bars."
+  },
+  {
+    "id": 6,
+    "name": "Commander's Palace",
+    "category": "food",
+    "neighborhood": "Garden District",
+    "lat": 29.9284,
+    "lng": -90.0827,
+    "description": "Legendary fine-dining restaurant known for Haute Creole cuisine."
+  },
+  {
+    "id": 7,
+    "name": "Audubon Park",
+    "category": "outdoors",
+    "neighborhood": "Uptown",
+    "lat": 29.9226,
+    "lng": -90.1265,
+    "description": "Sprawling park with lagoons, oaks, and skyline views."
+  },
+  {
+    "id": 8,
+    "name": "New Orleans City Park",
+    "category": "outdoors",
+    "neighborhood": "Mid-City",
+    "lat": 29.9853,
+    "lng": -90.0977,
+    "description": "One of the largest urban parks in the US, home to NOMA and the sculpture garden."
+  }
+]

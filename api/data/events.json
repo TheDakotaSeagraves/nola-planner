@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "French Quarter Festival",
+    "startDate": "2027-04-08",
+    "endDate": "2027-04-11",
+    "category": "music",
+    "description": "Free festival celebrating New Orleans music and culinary culture."
+  },
+  {
+    "id": 2,
+    "name": "New Orleans Jazz & Heritage Festival",
+    "startDate": "2027-04-22",
+    "endDate": "2027-05-01",
+    "category": "music",
+    "description": "World-renowned festival of music, food, and crafts."
+  },
+  {
+    "id": 3,
+    "name": "Mardi Gras",
+    "startDate": "2027-02-16",
+    "endDate": "2027-02-16",
+    "category": "festival",
+    "description": "Carnival season culminates with parades and citywide celebration."
+  },
+  {
+    "id": 4,
+    "name": "Tales of the Cocktail",
+    "startDate": "2027-07-20",
+    "endDate": "2027-07-25",
+    "category": "food",
+    "description": "Global cocktail and spirits industry festival."
+  },
+  {
+    "id": 5,
+    "name": "Satchmo SummerFest",
+    "startDate": "2027-08-06",
+    "endDate": "2027-08-08",
+    "category": "music",
+    "description": "Celebration of Louis Armstrong and New Orleans jazz heritage."
+  }
+]
