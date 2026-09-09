@@ -1,7 +1,7 @@
 # NOLA Planner — Handoff Doc
 
 Repo: https://github.com/TheDakotaSeagraves/nola-planner
-Branch history: `main` (baseline scaffold) → `feature/drag-and-drop-itinerary` (PR #1)
+Branch history: `main` (baseline scaffold) → `feature/drag-and-drop-itinerary` (PR #1, merged) → `feature/cross-day-drag-drop` (PR #2, merged)
 
 ## Repo & tooling
 
@@ -47,16 +47,27 @@ Branch history: `main` (baseline scaffold) → `feature/drag-and-drop-itinerary`
 | Native HTML5 drag-and-drop (`draggable`, `onDragStart`/`onDragOver`/`onDrop`) added to itinerary list items, no new dependency | Reordering only needed within a single day's list — the native browser drag API was enough, so no drag-and-drop library (e.g. `react-beautiful-dnd`) was added for something this scoped. |
 | Drag handle (⠿) + `.dragging` opacity state in `App.css` | Visual affordance so it's discoverable that rows are draggable, and feedback while dragging. |
 
+## Cross-day drag-and-drop (PR #2)
+
+| What | Why |
+|---|---|
+| `draggedItem` state changed from a bare id to `{ id, date }` | Needed the item's origin day at drop time to tell a same-day reorder apart from a cross-day move. |
+| `handleDrop` rewritten to branch on `source.date !== targetDate` | Same-day drops still just reorder; cross-day drops additionally call `updateItineraryItem(id, { date: targetDate })` to relocate the item before persisting the new order for the target day. |
+| Each day's `<ul>` given its own `onDragOver`/`onDrop` (in addition to each `<li>`) | Lets you drop into empty space below a day's existing items — not just directly onto another item — so an item can be appended to the end of a day, and a day with a single item is still a valid drop target. `stopPropagation()` on the `<li>` drop handler keeps a drop-on-item from also firing the day's container handler. |
+| `dragOverDate` state + `.day-block.drag-over` style in `App.css` | Cross-day dragging isn't discoverable without a cue — highlights whichever day block is currently under the dragged item. |
+
 ## How things were verified
 
 - `npm run lint` and `npm run build` run clean in `client/` after each change (one pre-existing, non-blocking oxlint warning about `setState` in an effect in `Itinerary.jsx` — intentional pattern for syncing form state from navigation, not fixed).
 - Full click-through in a real browser (Guide → add place → Itinerary; Events → add event → Itinerary; delete; drag-and-drop reorder, confirmed via direct `DragEvent` dispatch since synthetic mouse-drag doesn't trigger native HTML5 DnD).
 - Reorder confirmed to persist across a full page reload (re-fetched from the API, not just client state).
 - Repeated itinerary writes confirmed not to crash the API after the nodemon fix.
+- Cross-day move verified end to end: dragged an item from one day onto a specific item in another day, confirmed it relocated to the correct position, persisted after reload, and that the source day's remaining items were unaffected.
+- Same-day reorder regression-checked after the cross-day change; no console errors during any drag interaction.
 
 ## Open items / suggested next steps
 
 - Persist to a real database instead of flat JSON files (fine for local dev, not for concurrent/multi-user use).
 - Add auth and multi-trip support if this needs to serve more than one person's plan.
-- Consider cross-day drag-and-drop (currently reordering only works within a single day).
 - No automated tests exist yet (manual browser verification only) — worth adding if this grows.
+- No touch-device support — native HTML5 drag-and-drop doesn't work on mobile/tablet without extra polyfill work; fine for desktop-only use for now.
