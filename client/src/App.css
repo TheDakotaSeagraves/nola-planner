@@ -152,6 +152,18 @@ main {
 
 .day-block {
   margin-bottom: 1.5rem;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  transition: border-color 0.1s ease;
+}
+
+.day-block.drag-over {
+  border-color: #b99b6b;
+}
+
+.day-block ul {
+  min-height: 1.5rem;
 }
 
 .itinerary-item {

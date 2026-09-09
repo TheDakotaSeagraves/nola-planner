@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   getItinerary,
   addItineraryItem,
+  updateItineraryItem,
   deleteItineraryItem,
   reorderItinerary,
   getPlaces,
@@ -16,7 +17,8 @@ const Itinerary = ({ draftItem, clearDraft }) => {
   const [events, setEvents] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
-  const [draggedId, setDraggedId] = useState(null);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [dragOverDate, setDragOverDate] = useState(null);
 
   const loadItinerary = () => {
     getItinerary().then(setItems).catch((err) => setError(err.message));
@@ -70,29 +72,42 @@ const Itinerary = ({ draftItem, clearDraft }) => {
     loadItinerary();
   };
 
-  const handleDrop = async (date, targetId) => {
-    const sourceId = draggedId;
-    setDraggedId(null);
-    if (sourceId === null || sourceId === targetId) return;
+  const handleDrop = async (targetDate, targetId) => {
+    const source = draggedItem;
+    setDraggedItem(null);
+    setDragOverDate(null);
+    if (!source) return;
 
-    const dayIds = grouped[date].map((item) => item.id);
-    const fromIndex = dayIds.indexOf(sourceId);
-    const toIndex = dayIds.indexOf(targetId);
-    if (fromIndex === -1 || toIndex === -1) return;
+    const sameDay = source.date === targetDate;
+    if (sameDay && source.id === targetId) return;
 
-    dayIds.splice(fromIndex, 1);
-    dayIds.splice(toIndex, 0, sourceId);
+    const targetIds = (grouped[targetDate] || []).map((item) => item.id);
+    if (sameDay) {
+      targetIds.splice(targetIds.indexOf(source.id), 1);
+    }
+    if (targetId !== null) {
+      targetIds.splice(targetIds.indexOf(targetId), 0, source.id);
+    } else {
+      targetIds.push(source.id);
+    }
 
     setItems((prev) =>
-      prev.map((item) =>
-        item.date === date
-          ? { ...item, order: dayIds.indexOf(item.id) }
-          : item
-      )
+      prev.map((item) => {
+        if (item.id === source.id) {
+          return { ...item, date: targetDate, order: targetIds.indexOf(item.id) };
+        }
+        if (item.date === targetDate) {
+          return { ...item, order: targetIds.indexOf(item.id) };
+        }
+        return item;
+      })
     );
 
     try {
-      await reorderItinerary(date, dayIds);
+      if (!sameDay) {
+        await updateItineraryItem(source.id, { date: targetDate });
+      }
+      await reorderItinerary(targetDate, targetIds);
     } catch (err) {
       setError(err.message);
       loadItinerary();
@@ -176,22 +191,40 @@ const Itinerary = ({ draftItem, clearDraft }) => {
       {sortedDates.length === 0 && <p>No itinerary items yet.</p>}
 
       {sortedDates.map((date) => (
-        <div key={date} className="day-block">
+        <div
+          key={date}
+          className={`day-block${dragOverDate === date ? " drag-over" : ""}`}
+        >
           <h3>{date}</h3>
-          <ul>
+          <ul
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragOverDate(date);
+            }}
+            onDrop={() => handleDrop(date, null)}
+          >
             {grouped[date].map((item) => (
               <li
                 key={item.id}
                 className={`itinerary-item${
-                  draggedId === item.id ? " dragging" : ""
+                  draggedItem?.id === item.id ? " dragging" : ""
                 }`}
                 draggable
-                onDragStart={() => setDraggedId(item.id)}
-                onDragEnd={() => setDraggedId(null)}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => handleDrop(date, item.id)}
+                onDragStart={() => setDraggedItem({ id: item.id, date: item.date })}
+                onDragEnd={() => {
+                  setDraggedItem(null);
+                  setDragOverDate(null);
+                }}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragOverDate(date);
+                }}
+                onDrop={(e) => {
+                  e.stopPropagation();
+                  handleDrop(date, item.id);
+                }}
               >
-                <span className="drag-handle" title="Drag to reorder">
+                <span className="drag-handle" title="Drag to reorder or move to another day">
                   ⠿
                 </span>
                 <span className="time">{item.time || "--:--"}</span>
